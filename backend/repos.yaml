@@ -3,10 +3,14 @@
 :repos:
   - :name: "linux"
     :remote_url: "/home/hjq/playground/testgit/remote"
-    :tool: 
-      - "sparse"
-      - "coccinelle"
+    :tools: 
+      - [ "sparse", "-s" ]
+      - [ "coccinelle", "" ]
   - :name: "ucore"
     :remote_url: "/home/hjq/playground/testgit/remote"
-    :tool: 
-      - "grade"
+    :tools: 
+      - [ "grade" ]
+  - :name: "ucore"
+    :remote_url: "/home/hjq/playground/testgit/remote"
+    :tools: 
+      - [ "grade" ]

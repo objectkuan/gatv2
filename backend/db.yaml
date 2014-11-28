@@ -1,0 +1,6 @@
+:database:
+  :adapter: mysql
+  :host: 172.17.0.7
+  :database: gatv2
+  :username: root
+  :password: gatv2

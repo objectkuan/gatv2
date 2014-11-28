@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 # encoding: utf-8
 
+require 'active_record'
 require 'rugged'
 require 'fileutils'
 require 'yaml'
@@ -18,7 +19,7 @@ $GAT_REPOS = File.join $GAT, "repos/"
 $REPOS = Hash.new
 
 $LOAD_PATH.unshift(File.dirname(__FILE__))
-require "GitCommit.rb"
+require "TestCase.rb"
 
 def md5sum fn
 	md5 = `md5sum #{fn}`
@@ -33,7 +34,7 @@ def startme
 		puts "Please run as root" 
 		exit
 	end
-	
+
 	# Create gat direcotry at /
 	FileUtils.mkdir_p $GAT_REPOS
 
@@ -52,17 +53,20 @@ def startme
 			# Create Repos
 			repos = conf[:repos]
 			repos.each do |r|
-				# TODO: What if duplicated names
-				repo = GitCommit.new r
+				repo = TestCase.new r
+				# If test name exists, skip
+				if $REPOS[repo.name] != nil
+					puts "Duplicated name '#{repo.name}', skip"
+					next
+				end
 				$REPOS[repo.name] = repo if repo.built
 			end
 		end
-	
+
 		# Write to cache
 		$REPOS.each do |name, repo|
 			repo.pull
-			puts name
-			puts repo
+			repo.record_commit
 		end
 
 		sleep(3)

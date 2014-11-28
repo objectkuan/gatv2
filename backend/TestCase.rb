@@ -1,18 +1,29 @@
 # encoding: utf-8
 
-class GitCommit
+require 'active_record'
+require 'DB.rb'
+
+class TestCase
 	attr_reader :name
 	attr_reader :local_dir, :remote_url
 	attr_reader :repo
+	attr_reader :tools
 
 	# Initialize from the YAML configuration
 	def initialize config
+		# Read in data
 		@name = config[:name]
 		@remote_url = config[:remote_url]
 		@local_dir = File.join $GAT_REPOS, config[:name]
+		@tools = Hash.new
+		config[:tools].each do |tool|
+			@tools[tool[0]] = tool[1..-1]
+		end
+
 		FileUtils.mkdir_p @local_dir
 		Dir.chdir @local_dir
 		
+		# Pull the remote repository
 		begin
 			@repo = Rugged::Repository.new(@local_dir)
 		rescue
@@ -24,11 +35,12 @@ class GitCommit
 		end
 	end
 
-	# Print the object as a string
+	# Return the object as a string
 	def to_s
 		s = "[#{@name}] - [#{@local_dir}] \n"
 		s += "\t[#{@repo.head.target_id}]: \n"
 		s += "\t#{@repo.head.target.message}\n"
+		s += @tools.inspect
 		s
 	end
 
@@ -44,7 +56,30 @@ class GitCommit
 		Dir.chdir tmpdir
 	end
 
+	# Return the HEAD of the local repository
 	def head
 		@repo.head
+	end
+	
+	def record_commit
+		@tools.each do |tool, options|
+			db_repo = DB::Repository.find_by(name: @name)
+			if db_repo
+				# Such repo exists in previous test
+				#puts "Yes #{@name}"
+				db_repo.head_commit = @repo.head.target_id
+				db_repo.timestamp = Time.now
+				db_repo.save
+			else
+				# No reocrd of such repo
+				#puts "No #{@name}"
+				DB::Repository.create(
+					:name => @name,
+					:remote_url => @remote_url,
+					:head_commit => @repo.head.target_id,
+					:timestamp => Time.now
+				);
+			end
+		end
 	end
 end
