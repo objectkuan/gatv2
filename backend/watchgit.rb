@@ -7,19 +7,11 @@ require 'fileutils'
 require 'yaml'
 YAML::ENGINE.yamler = 'psych'
 
-# Global variables
-#   The source directory of GAT
-$ROOT = File.dirname(File.expand_path(__FILE__))
-#   The configuration file with repositories
-$REPO_CONFIG_FILE = File.join $ROOT, "repos.yaml"
-#   The working directory of GAT
-$GAT = "/gat/"
-$GAT_REPOS = File.join $GAT, "repos/"
-#   The Repositories
-$REPOS = Hash.new
-
 $LOAD_PATH.unshift(File.dirname(__FILE__))
 require "TestCase.rb"
+require 'env.rb'
+
+$REPOS = Hash.new
 
 def md5sum fn
 	md5 = `md5sum #{fn}`

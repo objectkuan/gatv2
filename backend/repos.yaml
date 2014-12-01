@@ -4,13 +4,8 @@
   - :name: "linux"
     :remote_url: "/home/hjq/playground/testgit/remote"
     :tools: 
-      - [ "sparse", "-s" ]
-      - [ "coccinelle", "" ]
+      - [ "docker", "sparse", "" ]
   - :name: "ucore"
     :remote_url: "/home/hjq/playground/testgit/remote"
     :tools: 
-      - [ "grade" ]
-  - :name: "ucore"
-    :remote_url: "/home/hjq/playground/testgit/remote"
-    :tools: 
-      - [ "grade" ]
+      - [ "docker", "grade", "" ]

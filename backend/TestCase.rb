@@ -1,5 +1,6 @@
 # encoding: utf-8
 
+require 'json'
 require 'active_record'
 require 'DB.rb'
 
@@ -17,7 +18,7 @@ class TestCase
 		@local_dir = File.join $GAT_REPOS, config[:name]
 		@tools = Hash.new
 		config[:tools].each do |tool|
-			@tools[tool[0]] = tool[1..-1]
+			@tools[tool[1]] = [ tool[0], *(tool[2..-1]) ]
 		end
 
 		FileUtils.mkdir_p @local_dir
@@ -62,13 +63,16 @@ class TestCase
 	end
 	
 	def record_commit
-		@tools.each do |tool, options|
-			db_repo = DB::Repository.find_by(name: @name)
+		@tools.each do |tool, settings|
+			db_repo = DB::Repository.find_by(name: @name, tool: tool)
 			if db_repo
 				# Such repo exists in previous test
 				#puts "Yes #{@name}"
 				db_repo.head_commit = @repo.head.target_id
-				db_repo.timestamp = Time.now
+				db_repo.head_time = Time.now
+				db_repo.tool = tool
+				db_repo.testbox = settings[0]
+				db_repo.tool_options = JSON.generate(settings[1..-1])
 				db_repo.save
 			else
 				# No reocrd of such repo
@@ -77,7 +81,10 @@ class TestCase
 					:name => @name,
 					:remote_url => @remote_url,
 					:head_commit => @repo.head.target_id,
-					:timestamp => Time.now
+					:head_time => Time.now,
+					:tool => tool,
+					:testbox => settings[0],
+					:tool_options => JSON.generate(settings[1..-1]) 
 				);
 			end
 		end
